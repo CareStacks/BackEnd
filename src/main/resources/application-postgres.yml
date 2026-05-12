@@ -1,0 +1,12 @@
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/careconnect}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:careconnect}
+    password: ${DB_PASSWORD:careconnect}
+  jpa:
+    hibernate:
+      ddl-auto: update
