@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "CareConnect Backend API",
                 version = "0.0.1",
-                description = "REST API for CareConnect agenda and notifications bounded contexts"
+                description = "REST API for CareConnect agenda, notifications, and diary bounded contexts"
         )
 )
 public class OpenApiConfig {

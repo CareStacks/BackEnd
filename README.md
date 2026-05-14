@@ -1,24 +1,25 @@
-# Feature: Notifications Module
+# Feature: Agenda Module
 
-> Módulo de gestión de notificaciones para CareConnect.
+> Módulo de gestión de agenda y citas para CareConnect.
 
 ## Estado: 🚧 En Desarrollo
 
 ## Funcionalidades
 
-- Envío de recordatorios de medicación
-- Notificaciones de citas médicas
-- Alertas de bienestar del paciente
-- Notificaciones push en tiempo real
+- Programación de citas médicas
+- Gestión de terapias y tratamientos
+- Calendario de medicación
+- Historial de eventos del paciente
 
 ## Endpoints Principales
 
 ```
-POST   /api/notifications         - Crear notificación
-GET    /api/notifications         - Listar notificaciones
-GET    /api/notifications/{id}    - Obtener notificación
-PUT    /api/notifications/{id}    - Actualizar notificación
-DELETE /api/notifications/{id}    - Eliminar notificación
+POST   /api/agenda          - Crear evento
+GET    /api/agenda          - Listar eventos
+GET    /api/agenda/{id}     - Obtener evento
+PUT    /api/agenda/{id}     - Actualizar evento
+DELETE /api/agenda/{id}     - Eliminar evento
+GET    /api/agenda/calendar - Ver calendario completo
 ```
 
 ## Tecnologías
@@ -32,5 +33,5 @@ DELETE /api/notifications/{id}    - Eliminar notificación
 Esta rama se integra a `develop` cuando esté lista para testing.
 
 ```
-feature/notifications → develop → main
+feature/agenda → develop → main
 ```
