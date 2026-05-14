@@ -1,37 +1,36 @@
-# Feature: Agenda Module
+# CareConnect Backend
 
-> Módulo de gestión de agenda y citas para CareConnect.
+Spring Boot REST API for the CareConnect bounded contexts that currently exist in this repository.
 
-## Estado: 🚧 En Desarrollo
+## Existing Bounded Contexts
 
-## Funcionalidades
+| Bounded context | README |
+| --- | --- |
+| IAM | `src/main/java/com/carestacks/careconnect/iam/README.md` |
+| Agenda | `src/main/java/com/carestacks/careconnect/agenda/README.md` |
+| Notifications | `src/main/java/com/carestacks/careconnect/notifications/README.md` |
+| Diary | `src/main/java/com/carestacks/careconnect/diary/README.md` |
+| Documents | `src/main/java/com/carestacks/careconnect/documents/README.md` |
 
-- Programación de citas médicas
-- Gestión de terapias y tratamientos
-- Calendario de medicación
-- Historial de eventos del paciente
+`INFO.md` also describes Compartir Perfiles, but that bounded context is not present in the current source tree and has not been created.
 
-## Endpoints Principales
+## Run
 
-```
-POST   /api/agenda          - Crear evento
-GET    /api/agenda          - Listar eventos
-GET    /api/agenda/{id}     - Obtener evento
-PUT    /api/agenda/{id}     - Actualizar evento
-DELETE /api/agenda/{id}     - Eliminar evento
-GET    /api/agenda/calendar - Ver calendario completo
+```bash
+mvn spring-boot:run
 ```
 
-## Tecnologías
+The application starts on port `8080` by default and uses the H2 in-memory datasource configured in `src/main/resources/application.yml`.
 
-- Spring Boot 4.0.6
-- Spring Data JPA
-- MySQL
+## Validate
 
-## Integración
-
-Esta rama se integra a `develop` cuando esté lista para testing.
-
+```bash
+mvn test
 ```
-feature/agenda → develop → main
-```
+
+## Swagger/OpenAPI
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+All current REST controllers are grouped by bounded context tags.
