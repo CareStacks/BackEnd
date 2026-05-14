@@ -2,6 +2,7 @@ package com.carestacks.careconnect.diary.infrastructure.persistence;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "diary_entries")
@@ -11,28 +12,45 @@ public class DiaryEntryJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "patient_id", nullable = false)
+    private UUID patientId;
+
     @Column(name = "content", nullable = false, length = 2000)
     private String content;
 
     @Column(name = "entry_date", nullable = false)
     private LocalDateTime entryDate;
 
-    // Constructors
     public DiaryEntryJpaEntity() {}
 
-    public DiaryEntryJpaEntity(Long id, String content, LocalDateTime entryDate) {
+    public DiaryEntryJpaEntity(Long id, UUID patientId, String content, LocalDateTime entryDate) {
         this.id = id;
+        this.patientId = patientId;
         this.content = content;
         this.entryDate = entryDate;
     }
 
-    // Getters and Setters
+    @PrePersist
+    public void prePersist() {
+        if (entryDate == null) {
+            entryDate = LocalDateTime.now();
+        }
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public UUID getPatientId() {
+        return patientId;
+    }
+
+    public void setPatientId(UUID patientId) {
+        this.patientId = patientId;
     }
 
     public String getContent() {

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class DiaryRepositoryImpl implements DiaryRepository {
@@ -33,7 +34,12 @@ public class DiaryRepositoryImpl implements DiaryRepository {
 
     @Override
     public List<DiaryEntry> findAll() {
-        return DiaryMapper.toDomainList(jpaRepository.findAll());
+        return DiaryMapper.toDomainList(jpaRepository.findAllByOrderByEntryDateDesc());
+    }
+
+    @Override
+    public List<DiaryEntry> findByPatientId(UUID patientId) {
+        return DiaryMapper.toDomainList(jpaRepository.findByPatientIdOrderByEntryDateDesc(patientId));
     }
 
     @Override
