@@ -1,210 +1,101 @@
-# IAM (Identity and Access Management) Bounded Context
+# IAM Bounded Context
 
-## Propósito
-El bounded context de IAM gestiona el registro de usuarios, autenticación y administración de sesiones para todos los actores del sistema (pacientes y cuidadores). Es un prerequisito de todo el sistema, ya que ningún otro contexto puede operar sin primero verificar la identidad del usuario.
+## Purpose
 
-## Responsabilidades Principales
-- Registro de nuevos usuarios con validación de email único y contraseña segura
-- Autenticación de usuarios mediante email y contraseña
-- Generación y validación de tokens de sesión
-- Gestión de sesiones (inicio, cierre, expiración)
-- Bloqueo de cuentas tras múltiples intentos fallidos de login
-- Validación de acceso por rol (PATIENT o CAREGIVER)
-- Invalidez de tokens al cerrar sesión
+IAM manages account registration, login, logout, session validation, and role checks for CareConnect users. According to `INFO.md`, every bounded context depends on IAM to identify active patients and caregivers before executing protected operations.
 
-## Estructura Interna de Carpetas
-```
-src/main/java/com/carestacks/careconnect/iam/
-├── application/
-│   └── iam/
-│       ├── abstractions/          # Interfaces de servicios de aplicación
-│       ├── dtos/                  # Objetos de transferencia de datos
-│       └── requests/              # DTOs para requests entrantes
-├── domain/
-│   └── iam/
-│       ├── entities/              # Entidades de dominio (User)
-│       ├── enums/                 # Enumeraciones de dominio (UserRole)
-│       └── valueobjects/          # Value objects (none currently)
-├── infrastructure/
-│   ├── AuthServiceImpl.java       # Implementación del servicio de autenticación
-│   ├── infrastructure/
-│   │   ├── mappers/               # Mapeadores entre capas
-│   │   ├── persistence/           # Entidades JPA
-│   │   └── repositories/          # Interfaces de repositorio Spring Data
-│   └── interfaces/                # REST Controllers
-└── README.md                      # Este archivo
-```
+## Main Responsibilities
 
-## Entidades, Casos de Uso o Componentes Principales
+- Register users with unique email addresses.
+- Enforce password rules: at least 8 characters, one uppercase letter, and one number.
+- Authenticate users with email and password.
+- Issue mock bearer tokens with a 30-minute inactivity-style expiration window.
+- Revoke tokens on logout for the current application instance.
+- Validate active sessions and optional role requirements.
+- Temporarily lock accounts for 15 minutes after 5 failed login attempts.
 
-### Entidad de Dominio: `User`
-Representa a un usuario registrado en el sistema con los siguientes atributos:
-- `id`: UUID único
-- `email`: Email único (utilizado para login)
-- `passwordHash`: Hash seguro de la contraseña
-- `fullName`: Nombre completo del usuario
-- `role`: Rol del usuario (PATIENT o CAREGIVER)
-- `active`: Estado de activación de la cuenta
-- `failedLoginAttempts`: Contador de intentos fallidos de login
-- `lockedUntil`: Timestamp de cuándo se desbloqueará la cuenta
-- `createdAt` y `updatedAt`: Timestamps de auditoría
+## Internal Architecture
 
-### Casos de Uso Principales
-1. **Registro de Usuario** (`RegisterUserRequest`)
-   - Validar formato de email
-   - Validar fortaleza de contraseña (mínimo 8 caracteres, número y mayúscula)
-   - Verificar unicidad de email
-   - Crear usuario con rol especificado
+- `domain/iam/entities`: `User` domain entity and account state rules.
+- `domain/iam/enums`: `UserRole` values.
+- `application/abstractions`: `AuthService` use-case contract.
+- `application/iam/dtos`: User and session validation responses.
+- `application/iam/requests`: Register, login, and login response models.
+- `infrastructure`: `AuthServiceImpl`, mappers, JPA entity, and Spring Data repository.
+- `interfaces`: REST controller documented for Swagger/OpenAPI.
 
-2. **Autenticación** (`LoginRequest`)
-   - Verificar existencia de email
-   - Validar contraseña mediante hash
-   - Gestionar intentos fallidos (bloqueo tras 5 intentos)
-   - Generar token de sesión válido
+## Main Entity
 
-3. **Gestión de Sesión**
-   - Validar token de sesión
-   - Cerrar sesión (invalidez de token)
-   - Obtener información del usuario actual
+- `User`: Registered account with email, password hash, full name, role, active flag, failed login counter, lock expiration timestamp, and audit timestamps.
 
-### Componentes de Infraestructura
-- **Repositorio**: `UserJpaRepository` extiende `JpaRepository` para operaciones CRUD
-- **Entidad JPA**: `UserJpaEntity` mapea la entidad de dominio a tabla `users`
-- **Mappers**: `UserMapper` convierte entre entidades de dominio, DTOs y entidades JPA
-- **Controlador**: `AuthController` expone los endpoints REST
+## Implemented Use Cases
 
-## Endpoints Disponibles
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `POST` | `/api/auth/register` | Registrar nuevo usuario |
-| `POST` | `/api/auth/login` | Iniciar sesión y obtener token |
-| `POST` | `/api/auth/logout` | Cerrar sesión |
-| `GET`  | `/api/auth/me` | Obtener información del usuario actual (requiere token) |
+- Register a patient or caregiver account.
+- Log in and receive a bearer token.
+- Log out and revoke the provided bearer token.
+- Get the current user from a bearer token.
+- Validate a token and optionally enforce a required role.
+- Lock an account after repeated failed credentials.
 
-### Detalles de los Endpoints
+## Endpoints
 
-#### Registro de Usuario
-- **Request Body**: 
-  ```json
-  {
-    "email": "usuario@ejemplo.com",
-    "password": "Password123",
-    "fullName": "Nombre Apellido",
-    "role": "PATIENT"
-  }
-  ```
-- **Responses**:
-  - `201 Created`: Usuario creado exitosamente
-  - `400 Bad Request`: Datos inválidos o email ya existente
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/auth/register` | Registers a user account. |
+| `POST` | `/api/auth/login` | Authenticates a user and returns a bearer token. |
+| `POST` | `/api/auth/logout` | Revokes the current bearer token. |
+| `GET` | `/api/auth/me` | Returns the user represented by the bearer token. |
+| `GET` | `/api/auth/validate?role={role}` | Validates the session and optionally checks the user role. |
 
-#### Inicio de Sesión
-- **Request Body**:
-  ```json
-  {
-    "email": "usuario@ejemplo.com",
-    "password": "Password123"
-  }
-  ```
-- **Responses**:
-  - `200 OK`: 
-    ```json
-    {
-      "token": "mock-token-uuid-generado",
-      "type": "Bearer",
-      "expiresIn": 3600
-    }
-    ```
-  - `401 Unauthorized`: Credenciales inválidas
-  - `423 Locked`: Cuenta bloqueada por intentos fallidos
+## Pending Endpoints
 
-#### Cierre de Sesión
-- **Request Headers**:
-  ```
-  Authorization: Bearer mock-token-uuid-generado
-  ```
-- **Responses**:
-  - `204 No Content`: Sesión cerrada exitosamente
+- No refresh-token endpoint exists yet.
+- Persistent token storage is not implemented; logout revocation is in memory for the current application process.
 
-#### Obtener Usuario Actual
-- **Request Headers**:
-  ```
-  Authorization: Bearer mock-token-uuid-generado
-  ```
-- **Responses**:
-  - `200 OK`: 
-    ```json
-    {
-      "id": "uuid-generado",
-      "email": "usuario@ejemplo.com",
-      "fullName": "Nombre Apellido",
-      "role": "PATIENT",
-      "active": true,
-      "createdAt": "2026-05-13T10:30:00",
-      "updatedAt": "2026-05-13T10:30:00"
-    }
-    ```
-  - `401 Unauthorized`: Token inválido o ausente
+## Corrected Endpoints
 
-## Dependencias o Integraciones Relevantes
-- **Spring Boot Starter Web**: Para exposición de endpoints REST
-- **Spring Boot Starter Data JPA**: Para persistencia en base de datos
-- **Spring Boot Starter Validation**: Para validación de requests con jakarta.validation
-- **Springdoc OpenAPI Starter Webmvc UI**: Para generación automática de documentación Swagger
-- **Base de Datos**: Configurada para usar H2 en desarrollo y PostgreSQL en producción
-- **PasswordEncoder**: Implementación de Spring Security para hash seguro de contraseñas (BCrypt por defecto)
+- `POST /api/auth/login` now applies 15-minute account locks after 5 failed attempts.
+- `POST /api/auth/logout` now revokes the provided token instead of only acknowledging the request.
+- `GET /api/auth/validate` was added to cover session validation and role access validation from `INFO.md`.
 
-## Cómo Ejecutar o Probar este Módulo
+## Swagger/OpenAPI
 
-### Prerrequisitos
-- Java 25 instalado
-- Maven 3.8+ instalado
-- Base de datos configurada (por defecto usa H2 en memoria)
+`AuthController` is annotated with `@Tag`, `@Operation`, and `@ApiResponses`. IAM endpoints are exposed under the `IAM` tag in Swagger UI at `/swagger-ui.html`.
 
-### Pasos para Ejecutar
-1. Clonar el repositorio
-2. Navegar al directorio del proyecto
-3. Ejecutar: `./mvnw spring-boot:run`
-4. La aplicación iniciará en el puerto 8080 por defecto
+The shared security configuration permits local Swagger and API access because this project currently validates bearer tokens explicitly inside IAM endpoints instead of using a global JWT filter.
 
-### Probar los Endpoints
-Una vez la aplicación esté corriendo, puede probar los endpoints usando:
+## How To Run Or Test
 
-#### Usando curl
-```bash
-# Registrar un nuevo usuario
-curl -X POST http://localhost:8080/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"Password123","fullName":"Test User","role":"PATIENT"}'
+1. Run `mvn test` to compile and execute the Spring context test.
+2. Start the application with `mvn spring-boot:run`.
+3. Open `http://localhost:8080/swagger-ui.html`.
+4. Register a user with `POST /api/auth/register`.
+5. Log in with `POST /api/auth/login`.
+6. Use the returned token as `Authorization: Bearer <token>` for `/me`, `/validate`, and `/logout`.
 
-# Iniciar sesión
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"Password123"}'
+## Example Request
 
-# Obtener usuario actual (usar el token del login anterior)
-curl -X GET http://localhost:8080/api/auth/me \
-  -H "Authorization: Bearer <token-del-paso-anterior>"
-
-# Cerrar sesión
-curl -X POST http://localhost:8080/api/auth/logout \
-  -H "Authorization: Bearer <token-del-paso-anterior>"
+```json
+{
+  "email": "patient@example.com",
+  "password": "Password123",
+  "fullName": "Patient Example",
+  "role": "PATIENT"
+}
 ```
 
-#### Usando Swagger UI
-Acceder a: `http://localhost:8080/swagger-ui.html`
-- Navegar a la sección "auth-controller"
-- Probar cada endpoint directamente desde la interfaz
+## Changes In This Feature Branch
 
-### Validación de Funcionamiento
-1. Verificar que el registro falle con email duplicado
-2. Verificar que el login falle con contraseña incorrecta
-3. Verificar que la cuenta se bloquee tras 5 intentos fallidos
-4. Verificar que los tokens expiren (en implementación real, actualmente son mocks)
-5. Verificar que solo usuarios activos puedan autenticarse
+- Added explicit Swagger/OpenAPI documentation to IAM endpoints.
+- Added session validation endpoint with optional role enforcement.
+- Changed `lockedUntil` from an invalid UUID field to a timestamp.
+- Added 30-minute mock token expiration.
+- Added in-memory token revocation for logout.
+- Added HTTP 401 handling for invalid credentials and HTTP 423 handling for locked accounts.
+- Configured local Spring Security to allow Swagger and REST testing while IAM handles mock bearer-token validation.
 
-## Notas de Implementación
-- Este contexto utiliza un enfoque de "mock tokens" para simplicidad en desarrollo. En producción, se debería implementar JWT válido con firma y expiración propera.
-- La contraseña se almacena usando BCrypt mediante Spring Security's PasswordEncoder.
-- El contexto sigue los principios de Domain-Driven Design con separación clara de capas.
-- Todas las operaciones de escritura son transaccionales para asegurar consistencia de datos.
-- Se maneja explícitamente el caso de cuenta bloqueada por intentos fallidos de login.
+## Technical Considerations
+
+- Tokens are intentionally simple mock tokens for this academic backend. A production implementation should replace them with signed JWTs or an identity provider such as Keycloak, Auth0, or Cognito.
+- In-memory token revocation is suitable only for local execution; it resets when the application restarts.
+- Authorization for domain resources remains the responsibility of the owning bounded context or the future Compartir Perfiles bounded context.
