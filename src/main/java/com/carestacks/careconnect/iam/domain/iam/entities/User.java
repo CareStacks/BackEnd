@@ -4,6 +4,7 @@ import com.carestacks.careconnect.iam.domain.iam.enums.UserRole;
 import com.carestacks.careconnect.shared.domain.entities.AuditableEntity;
 import com.carestacks.careconnect.shared.domain.exceptions.BusinessRuleException;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class User extends AuditableEntity {
@@ -14,7 +15,7 @@ public class User extends AuditableEntity {
     private UserRole role;
     private boolean active;
     private int failedLoginAttempts;
-    private UUID lockedUntil;
+    private LocalDateTime lockedUntil;
 
     public User(
             UUID id,
@@ -24,9 +25,9 @@ public class User extends AuditableEntity {
             UserRole role,
             boolean active,
             int failedLoginAttempts,
-            UUID lockedUntil,
-            java.time.LocalDateTime createdAt,
-            java.time.LocalDateTime updatedAt
+            LocalDateTime lockedUntil,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
     ) {
         super(id, createdAt, updatedAt);
         this.email = requireEmail(email);
@@ -50,7 +51,7 @@ public class User extends AuditableEntity {
     public void recordFailedLogin() {
         this.failedLoginAttempts++;
         if (failedLoginAttempts >= 5) {
-            this.lockedUntil = UUID.randomUUID();
+            this.lockedUntil = LocalDateTime.now().plusMinutes(15);
         }
         touch();
     }
@@ -71,8 +72,8 @@ public class User extends AuditableEntity {
         touch();
     }
 
-    public void lock(java.time.LocalDateTime until) {
-        this.lockedUntil = UUID.randomUUID();
+    public void lock(LocalDateTime until) {
+        this.lockedUntil = until;
         touch();
     }
 
@@ -126,7 +127,7 @@ public class User extends AuditableEntity {
     public UserRole getRole() { return role; }
     public boolean isActive() { return active; }
     public int getFailedLoginAttempts() { return failedLoginAttempts; }
-    public UUID getLockedUntil() { return lockedUntil; }
+    public LocalDateTime getLockedUntil() { return lockedUntil; }
 
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public void setFullName(String fullName) { this.fullName = fullName; }
