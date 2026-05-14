@@ -1,53 +1,63 @@
 package com.carestacks.careconnect.diary.domain.diary.entities;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import com.carestacks.careconnect.shared.domain.exceptions.BusinessRuleException;
 
-@Entity
-@Table(name = "diary_entries")
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 public class DiaryEntry {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "content", nullable = false, length = 2000)
+    private UUID patientId;
     private String content;
-
-    @Column(name = "entry_date", nullable = false)
     private LocalDateTime entryDate;
 
-    // Constructors
-    public DiaryEntry() {}
-
-    public DiaryEntry(Long id, String content, LocalDateTime entryDate) {
+    public DiaryEntry(Long id, UUID patientId, String content, LocalDateTime entryDate) {
         this.id = id;
-        this.content = content;
-        this.entryDate = entryDate;
+        this.patientId = requirePatientId(patientId);
+        this.content = requireContent(content);
+        this.entryDate = entryDate == null ? LocalDateTime.now() : entryDate;
     }
 
-    // Getters and Setters
+    public static DiaryEntry create(UUID patientId, String content) {
+        return new DiaryEntry(null, patientId, content, LocalDateTime.now());
+    }
+
+    public void updateContent(String content) {
+        this.content = requireContent(content);
+    }
+
+    private static UUID requirePatientId(UUID patientId) {
+        if (patientId == null) {
+            throw new BusinessRuleException("patientId is required");
+        }
+        return patientId;
+    }
+
+    private static String requireContent(String content) {
+        if (content == null || content.isBlank()) {
+            throw new BusinessRuleException("Diary entry content is required");
+        }
+        var trimmed = content.trim();
+        if (trimmed.length() > 2000) {
+            throw new BusinessRuleException("Diary entry content must not exceed 2000 characters");
+        }
+        return trimmed;
+    }
+
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public UUID getPatientId() {
+        return patientId;
     }
 
     public String getContent() {
         return content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
     public LocalDateTime getEntryDate() {
         return entryDate;
-    }
-
-    public void setEntryDate(LocalDateTime entryDate) {
-        this.entryDate = entryDate;
     }
 }

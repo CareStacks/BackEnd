@@ -1,17 +1,23 @@
 package com.carestacks.careconnect.diary.application.diary.abstractions;
 
 import com.carestacks.careconnect.diary.application.diary.dtos.DiaryEntryDto;
+import com.carestacks.careconnect.diary.application.diary.requests.CreateDiaryEntryRequest;
+import com.carestacks.careconnect.diary.application.diary.requests.UpdateDiaryEntryRequest;
+
 import java.util.List;
+import java.util.UUID;
 
 public interface DiaryService {
 
-    DiaryEntryDto createDiaryEntry(DiaryEntryDto diaryEntryDto);
+    DiaryEntryDto createDiaryEntry(CreateDiaryEntryRequest request);
 
     DiaryEntryDto getDiaryEntryById(Long id);
 
     List<DiaryEntryDto> getAllDiaryEntries();
 
-    DiaryEntryDto updateDiaryEntry(Long id, DiaryEntryDto diaryEntryDto);
+    List<DiaryEntryDto> getDiaryEntriesByPatient(UUID patientId);
+
+    DiaryEntryDto updateDiaryEntry(Long id, UpdateDiaryEntryRequest request);
 
     void deleteDiaryEntry(Long id);
 }
