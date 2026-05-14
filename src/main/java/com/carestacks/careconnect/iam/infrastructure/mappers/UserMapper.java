@@ -51,5 +51,8 @@ public class UserMapper {
     public static void copyToEntity(User user, UserJpaEntity entity) {
         entity.setFullName(user.getFullName());
         entity.setPasswordHash(user.getPasswordHash());
+        entity.setActive(user.isActive());
+        entity.setFailedLoginAttempts(user.getFailedLoginAttempts());
+        entity.setLockedUntil(user.getLockedUntil());
     }
 }
