@@ -1,0 +1,7 @@
+.git
+.gitignore
+.vercel
+target
+.DS_Store
+README.md
+INFO.md
