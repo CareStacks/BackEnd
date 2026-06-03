@@ -42,15 +42,14 @@ mvn test
 
 ## Swagger/OpenAPI
 
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: `https://careconnect-backend-hvyq.onrender.com/swagger-ui/index.html#/IAM/register`
 
 All current REST controllers are grouped by bounded context tags.
 =======
 ## Documentación
 
-- **API:** http://localhost:8080
-- **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **API:** https://careconnect-backend-hvyq.onrender.com
+- **Swagger UI:** https://careconnect-backend-hvyq.onrender.com/swagger-ui/index.html#/IAM/register
 
 ## Ramas de Trabajo
 
