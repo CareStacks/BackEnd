@@ -12,8 +12,9 @@ Spring Boot REST API for the CareConnect bounded contexts that currently exist i
 | Notifications | `src/main/java/com/carestacks/careconnect/notifications/README.md` |
 | Diary | `src/main/java/com/carestacks/careconnect/diary/README.md` |
 | Documents | `src/main/java/com/carestacks/careconnect/documents/README.md` |
+| Gestión de Consentimiento | `src/main/java/com/carestacks/careconnect/consents/README.md` |
 
-`INFO.md` also describes Compartir Perfiles, but that bounded context is not present in the current source tree and has not been created.
+`INFO.md` describes Acceso Compartido; that capability is implemented as the Gestión de Consentimiento bounded context.
 
 ## Run
 =======
@@ -32,7 +33,7 @@ Versión actual del backend lista para producción.
 mvn spring-boot:run
 ```
 
-The application starts on port `8080` by default and uses the H2 in-memory datasource configured in `src/main/resources/application.yml`.
+The application starts on port `8080` by default. Configure the datasource through `DB_URL`, `DB_DRIVER_CLASS_NAME`, `DB_USERNAME`, and `DB_PASSWORD`.
 
 ## Validate
 
@@ -40,17 +41,20 @@ The application starts on port `8080` by default and uses the H2 in-memory datas
 mvn test
 ```
 
+## Render PostgreSQL
+
+Deployment database notes are documented in `RENDER.md`. Secrets must be configured as environment variables, not committed to the repository.
+
 ## Swagger/OpenAPI
 
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: `https://careconnect-backend-hvyq.onrender.com/swagger-ui/index.html#/IAM/register`
 
 All current REST controllers are grouped by bounded context tags.
 =======
 ## Documentación
 
-- **API:** http://localhost:8080
-- **Swagger UI:** http://localhost:8080/swagger-ui.html
+- **API:** https://careconnect-backend-hvyq.onrender.com
+- **Swagger UI:** https://careconnect-backend-hvyq.onrender.com/swagger-ui/index.html#/IAM/register
 
 ## Ramas de Trabajo
 
