@@ -10,9 +10,12 @@ public class DocumentItemDto {
     private String title;
     private String description;
     private String fileUrl;
+    private String storageBucket;
+    private String storagePath;
     private String mimeType;
     private long fileSizeBytes;
     private LocalDateTime uploadedAt;
+    private String syncStatus;
 
     public DocumentItemDto() {}
 
@@ -22,18 +25,24 @@ public class DocumentItemDto {
             String title,
             String description,
             String fileUrl,
+            String storageBucket,
+            String storagePath,
             String mimeType,
             long fileSizeBytes,
-            LocalDateTime uploadedAt
+            LocalDateTime uploadedAt,
+            String syncStatus
     ) {
         this.id = id;
         this.documentType = documentType;
         this.title = title;
         this.description = description;
         this.fileUrl = fileUrl;
+        this.storageBucket = storageBucket;
+        this.storagePath = storagePath;
         this.mimeType = mimeType;
         this.fileSizeBytes = fileSizeBytes;
         this.uploadedAt = uploadedAt;
+        this.syncStatus = syncStatus;
     }
 
     public Long getId() {
@@ -76,6 +85,22 @@ public class DocumentItemDto {
         this.fileUrl = fileUrl;
     }
 
+    public String getStorageBucket() {
+        return storageBucket;
+    }
+
+    public void setStorageBucket(String storageBucket) {
+        this.storageBucket = storageBucket;
+    }
+
+    public String getStoragePath() {
+        return storagePath;
+    }
+
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
+
     public String getMimeType() {
         return mimeType;
     }
@@ -98,5 +123,13 @@ public class DocumentItemDto {
 
     public void setUploadedAt(LocalDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
+    }
+
+    public String getSyncStatus() {
+        return syncStatus;
+    }
+
+    public void setSyncStatus(String syncStatus) {
+        this.syncStatus = syncStatus;
     }
 }

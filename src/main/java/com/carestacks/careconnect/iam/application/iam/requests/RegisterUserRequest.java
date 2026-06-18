@@ -9,23 +9,23 @@ import jakarta.validation.constraints.Size;
 
 public class RegisterUserRequest {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "Ingresa tu correo electrónico")
+    @Email(message = "Ingresa un correo electrónico válido")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters with at least one number and one uppercase letter")
+    @NotBlank(message = "Ingresa tu contraseña")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     @Pattern(
             regexp = "^(?=.*[A-Z])(?=.*\\d).+$",
-            message = "Password must contain at least one uppercase letter and one number"
+            message = "La contraseña debe incluir al menos una mayúscula y un número"
     )
     private String password;
 
-    @NotBlank(message = "Full name is required")
-    @Size(max = 150, message = "Full name must not exceed 150 characters")
+    @NotBlank(message = "Ingresa tu nombre completo")
+    @Size(max = 150, message = "El nombre completo no debe superar 150 caracteres")
     private String fullName;
 
-    @NotNull(message = "Role is required")
+    @NotNull(message = "Selecciona si eres paciente o cuidador")
     private UserRole role;
 
     public String getEmail() { return email; }

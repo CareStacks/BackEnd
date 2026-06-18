@@ -1,6 +1,10 @@
 spring:
   application:
     name: careconnect-backend
+  servlet:
+    multipart:
+      max-file-size: ${APP_DOCUMENT_MAX_FILE_SIZE:10MB}
+      max-request-size: ${APP_DOCUMENT_MAX_REQUEST_SIZE:10MB}
   datasource:
     url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:h2:mem:careconnect;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1}}
     driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:${DB_DRIVER_CLASS_NAME:org.h2.Driver}}
@@ -23,6 +27,12 @@ spring:
 
 server:
   port: ${PORT:8080}
+
+supabase:
+  storage:
+    url: ${SUPABASE_URL:}
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
+    bucket: ${SUPABASE_STORAGE_BUCKET:documents}
 
 springdoc:
   swagger-ui:
