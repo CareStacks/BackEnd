@@ -43,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public LoginResponse register(RegisterUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessRuleException("User with this email already exists");
+            throw new BusinessRuleException("Ya existe una cuenta registrada con ese correo electrónico");
         }
 
         var user = User.register(
@@ -63,13 +63,13 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public LoginResponse login(LoginRequest request) {
         var userEntity = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+                .orElseThrow(() -> new BadCredentialsException("Correo o contraseña incorrectos"));
 
         if (!userEntity.isActive()) {
-            throw new BadCredentialsException("Inactive user account");
+            throw new BadCredentialsException("La cuenta está inactiva. Contacta soporte para revisarla");
         }
         if (isLocked(userEntity.getLockedUntil())) {
-            throw new LockedException("Account is temporarily locked until " + userEntity.getLockedUntil());
+            throw new LockedException("La cuenta está bloqueada temporalmente por varios intentos fallidos");
         }
         if (userEntity.getLockedUntil() != null) {
             userEntity.setLockedUntil(null);
@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
                 userEntity.setLockedUntil(LocalDateTime.now().plusMinutes(15));
             }
             userRepository.save(userEntity);
-            throw new BadCredentialsException("Invalid email or password");
+            throw new BadCredentialsException("Correo o contraseña incorrectos");
         }
 
         var user = UserMapper.toDomain(userEntity);
@@ -127,13 +127,13 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!userEntity.isActive()) {
-            throw new BadCredentialsException("Inactive user account");
+            throw new BadCredentialsException("La cuenta está inactiva. Contacta soporte para revisarla");
         }
         if (isLocked(userEntity.getLockedUntil())) {
-            throw new LockedException("Account is temporarily locked until " + userEntity.getLockedUntil());
+            throw new LockedException("La cuenta está bloqueada temporalmente por varios intentos fallidos");
         }
         if (requiredRole != null && userEntity.getRole() != requiredRole) {
-            throw new BadCredentialsException("User role is not authorized for this operation");
+            throw new BadCredentialsException("No tienes permisos para realizar esta acción");
         }
 
         return new SessionValidationDto(true, userEntity.getId(), userEntity.getRole(), parsedToken.expiresAt());
@@ -153,13 +153,13 @@ public class AuthServiceImpl implements AuthService {
 
     private ParsedToken validateTokenOrThrow(String token) {
         if (token == null || !token.startsWith(TOKEN_PREFIX) || revokedTokens.contains(token)) {
-            throw new BusinessRuleException("Invalid token");
+            throw new BusinessRuleException("Tu sesión no está activa. Inicia sesión nuevamente");
         }
 
         var tokenPayload = token.substring(TOKEN_PREFIX.length());
         var separatorIndex = tokenPayload.lastIndexOf('.');
         if (separatorIndex <= 0 || separatorIndex == tokenPayload.length() - 1) {
-            throw new BusinessRuleException("Invalid token");
+            throw new BusinessRuleException("Tu sesión no está activa. Inicia sesión nuevamente");
         }
 
         try {
@@ -167,11 +167,11 @@ public class AuthServiceImpl implements AuthService {
             var expiresAtEpochSeconds = Long.parseLong(tokenPayload.substring(separatorIndex + 1));
             var expiresAt = LocalDateTime.ofEpochSecond(expiresAtEpochSeconds, 0, ZoneOffset.UTC);
             if (expiresAt.isBefore(LocalDateTime.now())) {
-                throw new BusinessRuleException("Session token has expired");
+                throw new BusinessRuleException("Tu sesión expiró. Inicia sesión nuevamente");
             }
             return new ParsedToken(userId, expiresAt);
         } catch (IllegalArgumentException exception) {
-            throw new BusinessRuleException("Invalid token");
+            throw new BusinessRuleException("Tu sesión no está activa. Inicia sesión nuevamente");
         }
     }
 

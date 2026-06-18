@@ -17,9 +17,12 @@ public class DocumentItem {
     private String title;
     private String description;
     private String fileUrl;
+    private String storageBucket;
+    private String storagePath;
     private String mimeType;
     private long fileSizeBytes;
     private LocalDateTime uploadedAt;
+    private String syncStatus;
 
     public DocumentItem(
             Long id,
@@ -28,9 +31,12 @@ public class DocumentItem {
             String title,
             String description,
             String fileUrl,
+            String storageBucket,
+            String storagePath,
             String mimeType,
             long fileSizeBytes,
-            LocalDateTime uploadedAt
+            LocalDateTime uploadedAt,
+            String syncStatus
     ) {
         this.id = id;
         this.medicalDocumentId = medicalDocumentId;
@@ -38,9 +44,12 @@ public class DocumentItem {
         this.title = requireText(title, "title");
         this.description = description == null ? null : description.trim();
         this.fileUrl = requireText(fileUrl, "fileUrl");
+        this.storageBucket = storageBucket == null ? "" : storageBucket.trim();
+        this.storagePath = storagePath == null ? this.fileUrl : storagePath.trim();
         this.mimeType = requireAllowedMimeType(mimeType);
         this.fileSizeBytes = requireAllowedSize(fileSizeBytes);
         this.uploadedAt = uploadedAt == null ? LocalDateTime.now() : uploadedAt;
+        this.syncStatus = syncStatus == null || syncStatus.isBlank() ? "SYNCED" : syncStatus.trim();
     }
 
     public static DocumentItem upload(
@@ -53,7 +62,36 @@ public class DocumentItem {
             long fileSizeBytes,
             LocalDateTime uploadedAt
     ) {
-        return new DocumentItem(null, medicalDocumentId, documentType, title, description, fileUrl, mimeType, fileSizeBytes, uploadedAt);
+        return upload(medicalDocumentId, documentType, title, description, fileUrl, "", fileUrl, mimeType, fileSizeBytes, uploadedAt, "SYNCED");
+    }
+
+    public static DocumentItem upload(
+            Long medicalDocumentId,
+            DocumentType documentType,
+            String title,
+            String description,
+            String fileUrl,
+            String storageBucket,
+            String storagePath,
+            String mimeType,
+            long fileSizeBytes,
+            LocalDateTime uploadedAt,
+            String syncStatus
+    ) {
+        return new DocumentItem(
+                null,
+                medicalDocumentId,
+                documentType,
+                title,
+                description,
+                fileUrl,
+                storageBucket,
+                storagePath,
+                mimeType,
+                fileSizeBytes,
+                uploadedAt,
+                syncStatus
+        );
     }
 
     private static String requireText(String value, String fieldName) {
@@ -94,9 +132,12 @@ public class DocumentItem {
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public String getFileUrl() { return fileUrl; }
+    public String getStorageBucket() { return storageBucket; }
+    public String getStoragePath() { return storagePath; }
     public String getMimeType() { return mimeType; }
     public long getFileSizeBytes() { return fileSizeBytes; }
     public LocalDateTime getUploadedAt() { return uploadedAt; }
+    public String getSyncStatus() { return syncStatus; }
 
     public void assignToMedicalDocument(Long medicalDocumentId) { this.medicalDocumentId = medicalDocumentId; }
 }

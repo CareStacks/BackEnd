@@ -5,6 +5,7 @@ import com.carestacks.careconnect.documents.application.documents.dtos.DocumentI
 import com.carestacks.careconnect.documents.application.documents.dtos.MedicalDocumentDto;
 import com.carestacks.careconnect.documents.application.documents.requests.CreateMedicalDocumentRequest;
 import com.carestacks.careconnect.documents.application.documents.requests.UploadDocumentItemRequest;
+import com.carestacks.careconnect.documents.domain.documents.valueobjects.DocumentType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,15 +15,20 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,6 +95,32 @@ public class DocumentController {
             @Valid @RequestBody UploadDocumentItemRequest request
     ) {
         var medicalDocument = documentService.addDocumentItem(medicalDocumentId, request);
+        return ResponseEntity.created(URI.create("/api/documents/" + medicalDocumentId)).body(medicalDocument);
+    }
+
+    @Operation(summary = "Upload a document file", description = "Uploads the file to private Supabase Storage and stores only metadata in the database.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Document file uploaded"),
+            @ApiResponse(responseCode = "400", description = "Invalid file or storage configuration"),
+            @ApiResponse(responseCode = "404", description = "Medical document not found")
+    })
+    @PostMapping(value = "/{medicalDocumentId}/items/file", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MedicalDocumentDto> uploadDocumentFile(
+            @Parameter(description = "Medical document identifier") @PathVariable Long medicalDocumentId,
+            @RequestParam DocumentType documentType,
+            @RequestParam String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime uploadedAt,
+            @RequestParam("file") MultipartFile file
+    ) {
+        var medicalDocument = documentService.uploadDocumentFile(
+                medicalDocumentId,
+                documentType,
+                title,
+                description,
+                uploadedAt,
+                file
+        );
         return ResponseEntity.created(URI.create("/api/documents/" + medicalDocumentId)).body(medicalDocument);
     }
 

@@ -12,28 +12,37 @@ import java.time.LocalDateTime;
 
 public class UploadDocumentItemRequest {
 
-    @NotNull(message = "Document type is required")
+    @NotNull(message = "Selecciona el tipo de documento")
     private DocumentType documentType;
 
-    @NotBlank(message = "Title is required")
-    @Size(max = 255, message = "Title must not exceed 255 characters")
+    @NotBlank(message = "Ingresa el nombre del documento")
+    @Size(max = 255, message = "El nombre del documento no debe superar 255 caracteres")
     private String title;
 
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
+    @Size(max = 1000, message = "La descripción no debe superar 1000 caracteres")
     private String description;
 
-    @NotBlank(message = "File URL is required")
-    @Size(max = 500, message = "File URL must not exceed 500 characters")
+    @NotBlank(message = "Selecciona un archivo antes de continuar")
+    @Size(max = 500, message = "La ruta del archivo no debe superar 500 caracteres")
     private String fileUrl;
 
-    @NotBlank(message = "MIME type is required")
+    @Size(max = 80, message = "El bucket de almacenamiento no debe superar 80 caracteres")
+    private String storageBucket;
+
+    @Size(max = 500, message = "La ruta de almacenamiento no debe superar 500 caracteres")
+    private String storagePath;
+
+    @NotBlank(message = "El tipo de archivo no es válido")
     private String mimeType;
 
-    @Positive(message = "File size must be greater than zero")
-    @Max(value = DocumentItem.MAX_FILE_SIZE_BYTES, message = "File size must not exceed 10 MB")
+    @Positive(message = "El archivo está vacío o no se pudo leer")
+    @Max(value = DocumentItem.MAX_FILE_SIZE_BYTES, message = "El archivo supera el tamaño permitido")
     private long fileSizeBytes;
 
     private LocalDateTime uploadedAt;
+
+    @Size(max = 40, message = "El estado de sincronización no debe superar 40 caracteres")
+    private String syncStatus;
 
     public DocumentType getDocumentType() {
         return documentType;
@@ -67,6 +76,22 @@ public class UploadDocumentItemRequest {
         this.fileUrl = fileUrl;
     }
 
+    public String getStorageBucket() {
+        return storageBucket;
+    }
+
+    public void setStorageBucket(String storageBucket) {
+        this.storageBucket = storageBucket;
+    }
+
+    public String getStoragePath() {
+        return storagePath;
+    }
+
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
+
     public String getMimeType() {
         return mimeType;
     }
@@ -89,5 +114,13 @@ public class UploadDocumentItemRequest {
 
     public void setUploadedAt(LocalDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
+    }
+
+    public String getSyncStatus() {
+        return syncStatus;
+    }
+
+    public void setSyncStatus(String syncStatus) {
+        this.syncStatus = syncStatus;
     }
 }

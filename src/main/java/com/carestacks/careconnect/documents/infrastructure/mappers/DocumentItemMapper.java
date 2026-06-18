@@ -14,9 +14,12 @@ public class DocumentItemMapper {
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getFileUrl(),
+                entity.getStorageBucket(),
+                entity.getStoragePath(),
                 entity.getMimeType(),
                 entity.getFileSizeBytes(),
-                entity.getUploadedAt()
+                entity.getUploadedAt(),
+                entity.getSyncStatus()
         );
     }
 
@@ -28,9 +31,12 @@ public class DocumentItemMapper {
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getFileUrl(),
+                entity.getStorageBucket(),
+                entity.getStoragePath(),
                 entity.getMimeType(),
                 entity.getFileSizeBytes(),
-                entity.getUploadedAt()
+                entity.getUploadedAt(),
+                entity.getSyncStatus()
         );
     }
 
@@ -42,9 +48,12 @@ public class DocumentItemMapper {
                 documentItem.getTitle(),
                 documentItem.getDescription(),
                 documentItem.getFileUrl(),
+                documentItem.getStorageBucket(),
+                documentItem.getStoragePath(),
                 documentItem.getMimeType(),
                 documentItem.getFileSizeBytes(),
-                documentItem.getUploadedAt()
+                documentItem.getUploadedAt(),
+                documentItem.getSyncStatus()
         );
     }
 
@@ -54,9 +63,12 @@ public class DocumentItemMapper {
         entity.setTitle(documentItem.getTitle());
         entity.setDescription(documentItem.getDescription());
         entity.setFileUrl(documentItem.getFileUrl());
+        entity.setStorageBucket(documentItem.getStorageBucket());
+        entity.setStoragePath(documentItem.getStoragePath());
         entity.setMimeType(documentItem.getMimeType());
         entity.setFileSizeBytes(documentItem.getFileSizeBytes());
         entity.setUploadedAt(documentItem.getUploadedAt());
+        entity.setSyncStatus(documentItem.getSyncStatus());
     }
 
     public static java.util.List<DocumentItemDto> toDtoList(java.util.List<DocumentItemJpaEntity> entities) {

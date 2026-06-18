@@ -29,6 +29,12 @@ public class DocumentItemJpaEntity {
     @Column(name = "file_url", nullable = false, length = 500)
     private String fileUrl;
 
+    @Column(name = "storage_bucket", length = 80)
+    private String storageBucket;
+
+    @Column(name = "storage_path", length = 500)
+    private String storagePath;
+
     @Column(name = "mime_type", nullable = false, length = 100)
     private String mimeType;
 
@@ -37,6 +43,9 @@ public class DocumentItemJpaEntity {
 
     @Column(name = "uploaded_at", nullable = false)
     private LocalDateTime uploadedAt;
+
+    @Column(name = "sync_status", nullable = false, length = 40)
+    private String syncStatus = "SYNCED";
 
     public DocumentItemJpaEntity() {}
 
@@ -47,9 +56,12 @@ public class DocumentItemJpaEntity {
             String title,
             String description,
             String fileUrl,
+            String storageBucket,
+            String storagePath,
             String mimeType,
             long fileSizeBytes,
-            LocalDateTime uploadedAt
+            LocalDateTime uploadedAt,
+            String syncStatus
     ) {
         this.id = id;
         this.medicalDocument = medicalDocument;
@@ -57,9 +69,12 @@ public class DocumentItemJpaEntity {
         this.title = title;
         this.description = description;
         this.fileUrl = fileUrl;
+        this.storageBucket = storageBucket;
+        this.storagePath = storagePath;
         this.mimeType = mimeType;
         this.fileSizeBytes = fileSizeBytes;
         this.uploadedAt = uploadedAt;
+        this.syncStatus = syncStatus == null || syncStatus.isBlank() ? "SYNCED" : syncStatus;
     }
 
     public Long getId() {
@@ -110,6 +125,22 @@ public class DocumentItemJpaEntity {
         this.fileUrl = fileUrl;
     }
 
+    public String getStorageBucket() {
+        return storageBucket;
+    }
+
+    public void setStorageBucket(String storageBucket) {
+        this.storageBucket = storageBucket;
+    }
+
+    public String getStoragePath() {
+        return storagePath;
+    }
+
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
+
     public String getMimeType() {
         return mimeType;
     }
@@ -132,5 +163,13 @@ public class DocumentItemJpaEntity {
 
     public void setUploadedAt(LocalDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
+    }
+
+    public String getSyncStatus() {
+        return syncStatus;
+    }
+
+    public void setSyncStatus(String syncStatus) {
+        this.syncStatus = syncStatus;
     }
 }

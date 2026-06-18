@@ -24,6 +24,20 @@ SPRING_DATASOURCE_PASSWORD=<render-postgres-password>
 
 If the backend is deployed as a Render service in the same workspace/region, prefer the internal PostgreSQL host/connection string.
 
+If the PostgreSQL database is in a different Render account/workspace than the backend service, do **not** use the internal PostgreSQL host or internal database URL. Render internal database networking is scoped to the same workspace/private network, so the backend must use the external PostgreSQL host/connection string from the database account.
+
+When copying Render's external database URL, convert it to Spring's JDBC format:
+
+```bash
+# Render external URL shape:
+postgresql://<user>:<password>@<external-host>:5432/<database>
+
+# Spring datasource URL shape:
+SPRING_DATASOURCE_URL=jdbc:postgresql://<external-host>:5432/<database>?sslmode=require
+```
+
+Keep the user and password in `SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD`, not in committed files.
+
 ## Security notes
 
 - The Render API key must stay outside the repository.
