@@ -42,7 +42,7 @@ public class ConsentManagementController {
         this.consentManagementService = consentManagementService;
     }
 
-    @Operation(summary = "Share patient profile with a caregiver", description = "A patient grants or updates the views a caregiver can see. A caregiver can have only one shared patient profile.")
+    @Operation(summary = "Share patient profile with a caregiver", description = "A patient grants or updates the views a caregiver can see. A caregiver can be linked to multiple patient profiles.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Consent created or updated",
                     content = @Content(schema = @Schema(implementation = ProfileShareConsentDto.class))),
@@ -77,6 +77,15 @@ public class ConsentManagementController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         return ResponseEntity.ok(consentManagementService.getMyCaregiverProfile(extractBearerToken(authorizationHeader)));
+    }
+
+    @Operation(summary = "List my shared patient profiles", description = "Returns every patient profile assigned to the current caregiver.")
+    @ApiResponse(responseCode = "200", description = "Shared profiles returned")
+    @GetMapping("/me/caregiver/patients")
+    public ResponseEntity<List<ProfileShareConsentDto>> getMyCaregiverProfiles(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        return ResponseEntity.ok(consentManagementService.getMyCaregiverProfiles(extractBearerToken(authorizationHeader)));
     }
 
     @Operation(summary = "Validate caregiver access to a view", description = "Checks whether the current caregiver can see a specific patient view.")

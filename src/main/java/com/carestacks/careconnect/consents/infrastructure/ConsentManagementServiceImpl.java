@@ -47,13 +47,9 @@ public class ConsentManagementServiceImpl implements ConsentManagementService {
         var patient = getUserOrThrow(patientId, "Patient not found");
         var caregiver = resolveCaregiver(request);
 
-        var existingConsent = consentRepository.findByCaregiverId(caregiver.getId());
+        var existingConsent = consentRepository.findByCaregiverIdAndPatientId(caregiver.getId(), patientId);
         if (existingConsent.isPresent()) {
             var entity = existingConsent.get();
-            if (!entity.getPatientId().equals(patientId)) {
-                throw new BusinessRuleException("Caregiver already has a shared patient profile");
-            }
-
             var consent = ProfileShareConsentMapper.toDomain(entity);
             consent.updateAllowedViews(request.getAllowedViews());
             ProfileShareConsentMapper.copyToEntity(consent, entity);
@@ -64,7 +60,7 @@ public class ConsentManagementServiceImpl implements ConsentManagementService {
         try {
             return toDto(consentRepository.save(ProfileShareConsentMapper.toEntity(consent)));
         } catch (DataIntegrityViolationException exception) {
-            throw new BusinessRuleException("Caregiver already has a shared patient profile");
+            throw new BusinessRuleException("This patient profile is already shared with the caregiver");
         }
     }
 
@@ -103,9 +99,21 @@ public class ConsentManagementServiceImpl implements ConsentManagementService {
     @Transactional(readOnly = true)
     public ProfileShareConsentDto getMyCaregiverProfile(String token) {
         var caregiverId = requireSessionUser(token, UserRole.CAREGIVER);
-        var entity = consentRepository.findByCaregiverId(caregiverId)
+        var entity = consentRepository.findByCaregiverIdOrderByCreatedAtDesc(caregiverId)
+                .stream()
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Caregiver has no shared patient profile"));
         return toDto(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProfileShareConsentDto> getMyCaregiverProfiles(String token) {
+        var caregiverId = requireSessionUser(token, UserRole.CAREGIVER);
+        return consentRepository.findByCaregiverIdOrderByCreatedAtDesc(caregiverId)
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @Override

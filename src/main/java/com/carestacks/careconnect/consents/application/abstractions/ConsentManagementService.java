@@ -21,6 +21,8 @@ public interface ConsentManagementService {
 
     ProfileShareConsentDto getMyCaregiverProfile(String token);
 
+    List<ProfileShareConsentDto> getMyCaregiverProfiles(String token);
+
     CaregiverAccessDto validateCaregiverAccess(String token, UUID patientId, ConsentView view);
 
     boolean canCaregiverView(UUID caregiverId, UUID patientId, ConsentView view);

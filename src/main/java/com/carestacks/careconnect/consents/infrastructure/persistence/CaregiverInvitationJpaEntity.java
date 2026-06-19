@@ -1,6 +1,7 @@
 package com.carestacks.careconnect.consents.infrastructure.persistence;
 
 import com.carestacks.careconnect.consents.domain.consents.enums.ConsentView;
+import com.carestacks.careconnect.consents.domain.invitations.enums.CaregiverInvitationStatus;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -14,7 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -23,16 +23,14 @@ import java.util.UUID;
 
 @Entity
 @Table(
-        name = "profile_share_consents",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_profile_share_consents_patient_caregiver", columnNames = {"patient_id", "caregiver_id"})
-        },
+        name = "caregiver_invitations",
         indexes = {
-                @Index(name = "idx_profile_share_consents_patient", columnList = "patient_id"),
-                @Index(name = "idx_profile_share_consents_caregiver", columnList = "caregiver_id")
+                @Index(name = "idx_caregiver_invitations_patient", columnList = "patient_id"),
+                @Index(name = "idx_caregiver_invitations_caregiver", columnList = "caregiver_id"),
+                @Index(name = "idx_caregiver_invitations_status", columnList = "status")
         }
 )
-public class ProfileShareConsentJpaEntity {
+public class CaregiverInvitationJpaEntity {
 
     @Id
     private UUID id;
@@ -45,12 +43,21 @@ public class ProfileShareConsentJpaEntity {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-            name = "profile_share_consent_views",
-            joinColumns = @JoinColumn(name = "consent_id", nullable = false)
+            name = "caregiver_invitation_views",
+            joinColumns = @JoinColumn(name = "invitation_id", nullable = false)
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "view_name", nullable = false, length = 40)
     private Set<ConsentView> allowedViews = new LinkedHashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private CaregiverInvitationStatus status = CaregiverInvitationStatus.PENDING;
+
+    @Column(nullable = false)
+    private LocalDateTime expiresAt;
+
+    private LocalDateTime respondedAt;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -58,13 +65,16 @@ public class ProfileShareConsentJpaEntity {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    protected ProfileShareConsentJpaEntity() {}
+    public CaregiverInvitationJpaEntity() {}
 
-    public ProfileShareConsentJpaEntity(
+    public CaregiverInvitationJpaEntity(
             UUID id,
             UUID patientId,
             UUID caregiverId,
             Set<ConsentView> allowedViews,
+            CaregiverInvitationStatus status,
+            LocalDateTime expiresAt,
+            LocalDateTime respondedAt,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -72,6 +82,9 @@ public class ProfileShareConsentJpaEntity {
         this.patientId = patientId;
         this.caregiverId = caregiverId;
         setAllowedViews(allowedViews);
+        this.status = status == null ? CaregiverInvitationStatus.PENDING : status;
+        this.expiresAt = expiresAt;
+        this.respondedAt = respondedAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -99,6 +112,12 @@ public class ProfileShareConsentJpaEntity {
     public void setAllowedViews(Set<ConsentView> allowedViews) {
         this.allowedViews = allowedViews == null ? new LinkedHashSet<>() : new LinkedHashSet<>(allowedViews);
     }
+    public CaregiverInvitationStatus getStatus() { return status; }
+    public void setStatus(CaregiverInvitationStatus status) { this.status = status; }
+    public LocalDateTime getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(LocalDateTime expiresAt) { this.expiresAt = expiresAt; }
+    public LocalDateTime getRespondedAt() { return respondedAt; }
+    public void setRespondedAt(LocalDateTime respondedAt) { this.respondedAt = respondedAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

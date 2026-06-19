@@ -13,7 +13,7 @@ public interface ProfileShareConsentJpaRepository extends JpaRepository<ProfileS
 
     List<ProfileShareConsentJpaEntity> findByPatientIdOrderByCreatedAtDesc(UUID patientId);
 
-    Optional<ProfileShareConsentJpaEntity> findByCaregiverId(UUID caregiverId);
+    List<ProfileShareConsentJpaEntity> findByCaregiverIdOrderByCreatedAtDesc(UUID caregiverId);
 
     Optional<ProfileShareConsentJpaEntity> findByCaregiverIdAndPatientId(UUID caregiverId, UUID patientId);
 
