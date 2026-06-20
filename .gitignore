@@ -15,4 +15,5 @@ target/
 secrets.properties
 supabase.env
 supabase.*.env
+supabase/.temp/
 .vercel
