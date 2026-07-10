@@ -148,6 +148,7 @@ public class DocumentServiceImpl implements DocumentService {
             storagePath = "inline/" + file.getOriginalFilename();
         }
 
+        var safeMimeType = file.getContentType() != null ? file.getContentType() : "application/pdf";
         var documentItem = DocumentItem.upload(
                 medicalDocumentId,
                 documentType,
@@ -156,7 +157,7 @@ public class DocumentServiceImpl implements DocumentService {
                 fileUrl,
                 storageBucket,
                 storagePath,
-                file.getContentType(),
+                safeMimeType,
                 file.getSize(),
                 uploadDate,
                 "SYNCED"
