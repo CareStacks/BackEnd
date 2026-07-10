@@ -17,8 +17,6 @@ import com.carestacks.careconnect.documents.infrastructure.persistence.MedicalDo
 import com.carestacks.careconnect.documents.infrastructure.storage.SupabaseStorageService;
 import com.carestacks.careconnect.shared.domain.exceptions.BusinessRuleException;
 import com.carestacks.careconnect.shared.domain.exceptions.ResourceNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,8 +29,6 @@ import java.util.UUID;
 @Service
 @Transactional
 public class DocumentServiceImpl implements DocumentService {
-
-    private static final Logger log = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
     private final MedicalDocumentJpaRepository medicalDocumentRepository;
     private final DocumentItemJpaRepository documentItemRepository;
@@ -122,41 +118,25 @@ public class DocumentServiceImpl implements DocumentService {
         var medicalDocumentEntity = findMedicalDocumentEntity(medicalDocumentId);
         var uploadDate = uploadedAt == null ? LocalDateTime.now() : uploadedAt;
 
-        String fileUrl;
-        String storageBucket;
-        String storagePath;
+        // Store file inline as data URL (Supabase is unavailable)
+        var safeMimeType = file.getContentType() != null ? file.getContentType() : "application/pdf";
 
+        String fileUrl;
         try {
-            var storedDocument = supabaseStorageService.uploadPatientDocument(
-                    medicalDocumentEntity.getPatientId(),
-                    file,
-                    uploadDate
-            );
-            fileUrl = storedDocument.storageUrl();
-            storageBucket = storedDocument.bucket();
-            storagePath = storedDocument.path();
-        } catch (BusinessRuleException e) {
-            // Fallback when Supabase is unavailable: store content inline
-            log.warn("Supabase upload failed, falling back to inline storage: {}", e.getMessage());
-            try {
-                var base64Content = Base64.getEncoder().encodeToString(file.getBytes());
-                fileUrl = "data:" + file.getContentType() + ";base64," + base64Content;
-            } catch (java.io.IOException ioe) {
-                fileUrl = "inline://" + file.getOriginalFilename();
-            }
-            storageBucket = "inline";
-            storagePath = "inline/" + file.getOriginalFilename();
+            var base64Content = Base64.getEncoder().encodeToString(file.getBytes());
+            fileUrl = "data:" + safeMimeType + ";base64," + base64Content;
+        } catch (java.io.IOException e) {
+            fileUrl = "inline://" + (file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf");
         }
 
-        var safeMimeType = file.getContentType() != null ? file.getContentType() : "application/pdf";
         var documentItem = DocumentItem.upload(
                 medicalDocumentId,
                 documentType,
                 title,
                 description,
                 fileUrl,
-                storageBucket,
-                storagePath,
+                "inline",
+                "inline/" + (file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf"),
                 safeMimeType,
                 file.getSize(),
                 uploadDate,
