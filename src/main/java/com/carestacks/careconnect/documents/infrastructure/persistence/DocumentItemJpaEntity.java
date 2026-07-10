@@ -23,7 +23,7 @@ public class DocumentItemJpaEntity {
     @Column(name = "title", nullable = false, length = 255)
     private String title;
 
-    @Column(name = "description", length = 1000)
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "file_url", nullable = false, length = 500)

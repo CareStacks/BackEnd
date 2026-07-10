@@ -19,7 +19,7 @@ public class UploadDocumentItemRequest {
     @Size(max = 255, message = "El nombre del documento no debe superar 255 caracteres")
     private String title;
 
-    @Size(max = 1000, message = "La descripción no debe superar 1000 caracteres")
+    @Size(max = 10000, message = "La descripción no debe superar 10000 caracteres")
     private String description;
 
     @NotBlank(message = "Selecciona un archivo antes de continuar")

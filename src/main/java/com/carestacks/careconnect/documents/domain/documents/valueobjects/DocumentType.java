@@ -8,5 +8,6 @@ public enum DocumentType {
     REFERRAL,
     VACCINATION_RECORD,
     INSURANCE_FORM,
+    DICTO,
     OTHER
 }
