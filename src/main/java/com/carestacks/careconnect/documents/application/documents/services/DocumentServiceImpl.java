@@ -117,27 +117,21 @@ public class DocumentServiceImpl implements DocumentService {
     ) {
         var medicalDocumentEntity = findMedicalDocumentEntity(medicalDocumentId);
         var uploadDate = uploadedAt == null ? LocalDateTime.now() : uploadedAt;
-
-        // Store file inline as data URL (Supabase is unavailable)
-        var safeMimeType = file.getContentType() != null ? file.getContentType() : "application/pdf";
-
-        String fileUrl;
-        try {
-            var base64Content = Base64.getEncoder().encodeToString(file.getBytes());
-            fileUrl = "data:" + safeMimeType + ";base64," + base64Content;
-        } catch (java.io.IOException e) {
-            fileUrl = "inline://" + (file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf");
-        }
+        var storedDocument = supabaseStorageService.uploadPatientDocument(
+                medicalDocumentEntity.getPatientId(),
+                file,
+                uploadDate
+        );
 
         var documentItem = DocumentItem.upload(
                 medicalDocumentId,
                 documentType,
                 title,
                 description,
-                fileUrl,
-                "inline",
-                "inline/" + (file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf"),
-                safeMimeType,
+                storedDocument.storageUrl(),
+                storedDocument.bucket(),
+                storedDocument.path(),
+                file.getContentType(),
                 file.getSize(),
                 uploadDate,
                 "SYNCED"
